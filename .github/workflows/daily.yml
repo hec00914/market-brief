@@ -3,7 +3,7 @@ name: 全球市場早報
 on:
   schedule:
     # GitHub 使用 UTC 時間：UTC 週日～週四 23:30 = 台北週一～週五 07:30
-    - cron: "30 23 * * 0-4"
+    - cron: "30 22 * * 0-4"
   workflow_dispatch:   # 允許在網頁上手動按「Run workflow」立即執行
 
 permissions:
