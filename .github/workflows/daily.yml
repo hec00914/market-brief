@@ -3,7 +3,7 @@ name: 全球市場早報
 on:
   schedule:
     # GitHub 使用 UTC 時間：UTC 週日～週四 23:30 = 台北週一～週五 07:30
-    - cron: "30 22 * * 0-4"
+    - cron: "30 23 * * 0-4"
   workflow_dispatch:   # 允許在網頁上手動按「Run workflow」立即執行
 
 permissions:
@@ -16,19 +16,17 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-and-publish:
+  # 第一段：產生報告並打包
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     env:
       BRIEF_OUTPUT_DIR: docs
     steps:
       - name: 取得程式碼
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 安裝 Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -50,12 +48,19 @@ jobs:
       - name: 設定 Pages
         uses: actions/configure-pages@v5
 
-      - name: 上傳網頁
-        uses: actions/upload-pages-artifact@v3
+      - name: 打包網頁
+        uses: actions/upload-pages-artifact@v4
         with:
           path: docs
 
+  # 第二段：等第一段完成後才發佈
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: 發佈到 GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        
